@@ -52,7 +52,12 @@ function getCustomOverlayUrl(type: string, traitType: string, filename: string):
   return `/${type}/${traitType.toLowerCase()}/${filename}`;
 }
 
-const InputField = ({ value, onChange, placeholder, disabled }) => (
+const InputField: React.FC<{
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder: string;
+  disabled: boolean;
+}> = ({ value, onChange, placeholder, disabled }) => (
   <input
     type="number"
     min="0"
@@ -64,7 +69,12 @@ const InputField = ({ value, onChange, placeholder, disabled }) => (
   />
 );
 
-const Button = ({ onClick, children, className, disabled }) => (
+const Button: React.FC<{
+  onClick: () => void;
+  children: React.ReactNode;
+  className: string;
+  disabled?: boolean;
+}> = ({ onClick, children, className, disabled }) => (
   <button
     onClick={onClick}
     className={`px-4 py-2 rounded-md transition-colors duration-200 ${className}`}
@@ -74,56 +84,73 @@ const Button = ({ onClick, children, className, disabled }) => (
   </button>
 );
 
-const TraitSelector = ({ 
-  traitType, 
-  selectedTraits, 
-  originalTraits, 
-  handleTraitChange, 
-  customOverlays, 
-  handleOverlaySelect, 
+const TraitSelector: React.FC<{
+  traitType: string;
+  selectedTraits: Record<string, string>;
+  originalTraits: { trait_type: string; value: string }[];
+  handleTraitChange: (traitType: string, value: string) => void;
+  customOverlays: Record<string, string | null>;
+  handleOverlaySelect: (traitType: string, filename: string | null) => void;
+  getTokenType: () => string;
+  resetTrait: (traitType: string) => void;
+}> = ({
+  traitType,
+  selectedTraits,
+  originalTraits,
+  handleTraitChange,
+  customOverlays,
+  handleOverlaySelect,
   getTokenType,
-  resetTrait
+  resetTrait,
 }) => {
   const hasCustomOverlays = (CUSTOM_OVERLAYS[traitType] ?? []).length > 0;
   const originalTrait = originalTraits.find(t => t.trait_type === traitType)?.value || "None";
   const currentValue = selectedTraits[traitType] ?? originalTrait;
   const isModified = selectedTraits[traitType] !== undefined && selectedTraits[traitType] !== originalTrait;
-  
+
   return (
     <div className="flex flex-wrap items-center gap-2 py-3 border-b border-gray-100 last:border-0">
       <div className="w-32 text-sm font-medium text-gray-700">{traitType}</div>
-      
       <div className="flex items-center gap-2 flex-1">
         <div className="flex-1 flex items-center gap-2">
-          <div className={`px-3 py-1.5 rounded-md ${isModified ? "bg-blue-50 text-blue-700 border border-blue-200" : "bg-gray-50 text-gray-700 border border-gray-200"}`}>
+          <div
+            className={`px-3 py-1.5 rounded-md ${
+              isModified ? "bg-blue-50 text-blue-700 border border-blue-200" : "bg-gray-50 text-gray-700 border border-gray-200"
+            }`}
+          >
             {currentValue}
           </div>
-          
           {currentValue !== "None" && (
-            <button 
+            <button
               onClick={() => handleTraitChange(traitType, "None")}
               className="text-gray-400 hover:text-red-500 transition-colors"
               title="Remove trait"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
               </svg>
             </button>
           )}
-          
           {isModified && originalTrait !== "None" && (
-            <button 
+            <button
               onClick={() => resetTrait(traitType)}
               className="text-gray-400 hover:text-blue-500 transition-colors"
               title="Reset to original trait"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                  clipRule="evenodd"
+                />
               </svg>
             </button>
           )}
         </div>
-        
         {hasCustomOverlays && (
           <div className="flex items-center gap-1">
             <div className="h-6 w-px bg-gray-200 mx-1"></div>
@@ -132,13 +159,14 @@ const TraitSelector = ({
                 key={overlay.filename}
                 onClick={() => {
                   if (customOverlays[traitType] === overlay.filename) {
-                    // Deselect if already selected
                     handleOverlaySelect(traitType, null);
                   } else {
                     handleOverlaySelect(traitType, overlay.filename);
                   }
                 }}
-                className={`w-8 h-8 p-1 border-2 rounded-md transition-all ${customOverlays[traitType] === overlay.filename ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"}`}
+                className={`w-8 h-8 p-1 border-2 rounded-md transition-all ${
+                  customOverlays[traitType] === overlay.filename ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"
+                }`}
                 title={overlay.tooltip}
               >
                 <img
@@ -155,13 +183,13 @@ const TraitSelector = ({
   );
 };
 
-const TypeDisplay = ({ type }) => (
+const TypeDisplay: React.FC<{ type: string }> = ({ type }) => (
   <div className="inline-flex items-center px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-sm font-medium">
     <span className="mr-1">Type:</span> {type}
   </div>
 );
 
-const ErrorMessage = ({ message }) => (
+const ErrorMessage: React.FC<{ message: string }> = ({ message }) => (
   <div className="text-red-600 bg-red-50 p-3 rounded-md border border-red-200 flex items-start">
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -170,7 +198,7 @@ const ErrorMessage = ({ message }) => (
   </div>
 );
 
-const Canvas = ({ canvasRef }) => (
+const Canvas: React.FC<{ canvasRef: React.RefObject<HTMLCanvasElement | null> }> = ({ canvasRef }) => (
   <canvas ref={canvasRef} width={500} height={500} className="border rounded-lg shadow-lg bg-white" />
 );
 
@@ -274,7 +302,7 @@ export default function PlaguePage() {
       if (metadata.name) setTokenName(metadata.name);
 
       // Set token type
-      const typeAttr = metadata.attributes?.find(a => a.trait_type === "Type");
+      const typeAttr = metadata.attributes?.find((a: { trait_type: string; value: string }) => a.trait_type === "Type");
       if (typeAttr) {
         setTokenType(typeAttr.value);
       }
@@ -353,7 +381,10 @@ export default function PlaguePage() {
                   disabled={loading}
                 />
                 <Button
-                  onClick={handleFetch}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleFetch({ preventDefault: () => {} } as FormEvent);
+                  }}
                   className="bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300"
                   disabled={loading}
                 >
