@@ -227,6 +227,8 @@ export default function PlaguePage() {
     const typeAttr = attributes.find(a => a.trait_type.toLowerCase() === "type");
     const type = typeAttr ? typeAttr.value.toLowerCase() : "army";
 
+    const skinAttr = attributes.find(a => a.trait_type.toLowerCase() === "skin");
+
     const ordered = TRAIT_ORDER.map(traitType =>
       attributes.find(a => a.trait_type === traitType) ?? { trait_type: traitType, value: "None" }
     );
@@ -252,6 +254,14 @@ export default function PlaguePage() {
           const additionalSrc = `https://upgrade.plaguebrands.io/traits/${type}/additional/${file}.png`;
           await loadAndDrawImage(ctx, additionalSrc, canvas.width, canvas.height);
         }
+
+        if (trait.trait_type === "Hands") {
+          const hand = value.toLowerCase().replace(/ /g, "-").replace(/[^a-z0-9-]/g, "");
+          const file = skinAttr ? skinAttr.value.toLowerCase().replace(/ /g, "-").replace(/[^a-z0-9-]/g, "") : "none";
+          const additionalSrc = `https://upgrade.plaguebrands.io/traits/${type}/hands/${hand}/${file}.png`;
+          await loadAndDrawImage(ctx, additionalSrc, canvas.width, canvas.height);
+        }
+
       }
     }
   }
