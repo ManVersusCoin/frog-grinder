@@ -381,8 +381,7 @@ export default function PlaguePage() {
                   disabled={loading}
                 />
                 <Button
-                  onClick={(e) => {
-                    e.preventDefault();
+                  onClick={() => {
                     handleFetch({ preventDefault: () => {} } as FormEvent);
                   }}
                   className="bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300"
