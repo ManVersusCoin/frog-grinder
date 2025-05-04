@@ -279,13 +279,8 @@ export default function PlaguePage() {
   
       let metadata: any;
   
+      // Try fetching from Alchemy first
       try {
-        const uri: string = await contract.tokenURI(tokenId);
-        const json = await fetch(ipfsToHttp(uri)).then(res => res.json());
-        metadata = json;
-      } catch (contractErr) {
-        console.warn("Fallback to Alchemy API due to contract error:", contractErr);
-  
         const alchemyRes = await fetch(`https://eth-mainnet.g.alchemy.com/nft/v3/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}/getNFTMetadata?contractAddress=${CONTRACT_ADDRESS}&tokenId=${tokenId}&refreshCache=false`);
         const alchemyJson = await alchemyRes.json();
   
@@ -296,11 +291,22 @@ export default function PlaguePage() {
         }
   
         if (alchemyJson?.name) setTokenName(alchemyJson.name);
+      } catch (alchemyErr) {
+        console.warn("Fallback to IPFS due to Alchemy error:", alchemyErr);
+  
+        try {
+          const uri: string = await contract.tokenURI(tokenId);
+          const json = await fetch(ipfsToHttp(uri)).then(res => res.json());
+          metadata = json;
+        } catch (contractErr) {
+          console.error("Failed to fetch metadata from IPFS:", contractErr);
+          throw new Error("Failed to fetch metadata from both Alchemy and IPFS.");
+        }
       }
   
       setTraits(metadata.attributes || []);
       if (metadata.name) setTokenName(metadata.name);
-
+  
       // Set token type
       const typeAttr = metadata.attributes?.find((a: { trait_type: string; value: string }) => a.trait_type === "Type");
       if (typeAttr) {
