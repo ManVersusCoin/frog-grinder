@@ -239,9 +239,18 @@ export default function PlaguePage() {
           const src = getTraitImageUrl(trait.trait_type, value, attributes);
           await loadAndDrawImage(ctx, src, canvas.width, canvas.height);
         }
+
+        // Check for custom overlays
         if (overlays[trait.trait_type] && overlays[trait.trait_type] !== "none") {
           const src = getCustomOverlayUrl(type, trait.trait_type, overlays[trait.trait_type]!);
           await loadAndDrawImage(ctx, src, canvas.width, canvas.height);
+        }
+
+        // Specific case: if the Mouth trait contains "cigar"
+        if (trait.trait_type === "Mouth" && value.toLowerCase().includes("cigar")) {
+          const file = value.toLowerCase().replace(/ /g, "-").replace(/[^a-z0-9-]/g, "");
+          const additionalSrc = `https://upgrade.plaguebrands.io/traits/${type}/additional/${file}.png`;
+          await loadAndDrawImage(ctx, additionalSrc, canvas.width, canvas.height);
         }
       }
     }
